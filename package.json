@@ -21,6 +21,7 @@
     "@zxcvbn-ts/core": "^3.0.4",
     "@zxcvbn-ts/language-en": "^3.0.2",
     "angular-password-strength-meter": "^8.1.0",
+    "ngx-clipboard": "^16.0.0",
     "ngx-slider-v2": "^17.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

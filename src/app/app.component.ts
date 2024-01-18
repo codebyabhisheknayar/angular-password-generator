@@ -34,7 +34,7 @@ export class AppComponent {
     this.isDarkTheme = !this.isDarkTheme;
   }
   onChangeUseUppercaseLetters() {
-    console.log(this.includeUppercaseLetters);
+
     this.includeUppercaseLetters = !this.includeUppercaseLetters
   }
 
@@ -50,32 +50,7 @@ export class AppComponent {
   }
 
   logSliderValue(event: any) {
-    console.log('Slider Value:', event);
-    // const desiredCheckboxCount = this.sliderControl.value;
-    // // Update checkbox states based on the slider value
-    // if (desiredCheckboxCount >= 1 && !this.includeUppercaseLetters) {
-    //   this.includeUppercaseLetters = true;
-    // } else if (desiredCheckboxCount < 1 && this.includeUppercaseLetters) {
-    //   this.includeUppercaseLetters = false;
-    // }
-
-    // if (desiredCheckboxCount >= 2 && !this.includeLowercaseLetters) {
-    //   this.includeLowercaseLetters = true;
-    // } else if (desiredCheckboxCount < 2 && this.includeLowercaseLetters) {
-    //   this.includeLowercaseLetters = false;
-    // }
-
-    // if (desiredCheckboxCount >= 3 && !this.includeNumbers) {
-    //   this.includeNumbers = true;
-    // } else if (desiredCheckboxCount < 3 && this.includeNumbers) {
-    //   this.includeNumbers = false;
-    // }
-
-    // if (desiredCheckboxCount >= 4 && !this.includeSymbols) {
-    //   this.includeSymbols = true;
-    // } else if (desiredCheckboxCount < 4 && this.includeSymbols) {
-    //   this.includeSymbols = false;
-    // }
+    // console.log('Slider Value:', event);
   }
 
 
@@ -124,7 +99,6 @@ export class AppComponent {
 
 
   public onPasswordStrengthChange(score: number | null) {
-    console.log(score);
     if (score !== null) {
       switch (Math.round(score)) {
         case 0:
@@ -148,8 +122,6 @@ export class AppComponent {
       this.passwordStrengthLabel = '';
     }
   }
-
-
 
 
 }

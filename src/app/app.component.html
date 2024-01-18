@@ -5,7 +5,7 @@
       <div class="max-w-md overflow-hidden shadow-lg bg-[#24232B] dark:bg-black mb-3">
         <div class="px-3 py-4">
           <div class="relative w-full">
-            <div class="absolute inset-y-0 end-0 flex items-center pe-1 pointer-events-none">
+            <div class="absolute inset-y-0 end-0 flex items-center pe-1" [ngxClipboard]="passwordgen">
               <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
                 <path
@@ -18,7 +18,7 @@
             </div>
             <input type="text" id="simple-search"
               class="text-white text-sm bg-transparent  focus:black focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-text-white dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Your Password" [value]="password">
+              placeholder="Your Password" [value]="password" #passwordgen>
           </div>
         </div>
       </div>
