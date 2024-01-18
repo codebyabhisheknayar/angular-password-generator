@@ -1,1 +1,54 @@
+.ngx-slider-wrap {
+  ::ng-deep {
+    .ngx-slider {
+      .ngx-slider-pointer {
+        width: 24px;
+        height: 24px;
+        top: -10px;
+        &.ngx-slider-active{
+          &::after{
+                background-color: #16181E!important;
+          }
+        }
+        &:after {
+          width: 20px;
+          height: 20px;
+          position: absolute;
+          top: 2px;
+          left: 2px;
+          border-radius: 50%;
+            background-color: #16181E !important;
+        }
+      }
+    }
+  }
+}
 
+::ng-deep {
+  .psm__progress-bar {
+    height: 24px !important;
+
+    .psm__progress-bar-items {
+      justify-content: space-between !important;
+
+      .psm__progress-bar-item {
+        flex: 1 !important;
+        border-right: 4px solid #18171F;
+      }
+    }
+
+    .psm__progress-bar-overlay {
+      height: 24px !important;
+    }
+  }
+
+  .ngx-slider {
+    .ngx-slider-selection {
+      background-color: #A3FFAA !important;
+    }
+
+    .ngx-slider-pointer {
+      background-color: #A3FFAA !important;
+    }
+  }
+}
