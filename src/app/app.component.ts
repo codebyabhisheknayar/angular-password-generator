@@ -1,7 +1,9 @@
 import { Component, HostBinding } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Options } from 'ngx-slider-v2';
-
+import { Storage } from '@google-cloud/storage';  // Import the Google Cloud Storage module
+import { HttpClient } from '@angular/common/http';
+declare var gapi: any;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -29,6 +31,33 @@ export class AppComponent {
 
   isDarkTheme = false;
   score: number | null = null;
+
+  private storage = new Storage({
+    keyFilename: './../assets/client_secret_438341116528-9nq9917dvo6lod4dgqsf7st6p4q8ua5l.apps.googleusercontent.com.json', // Replace with the path to your service account key file
+    projectId: 'password-generator-411613', // Replace with your Google Cloud project ID
+  });
+  auth2: any;
+
+  constructor(private http: HttpClient) { }
+
+  ngOnInit() {
+    // Load Google API Client Library
+    gapi.load('auth2', () => {
+      gapi.auth2.init({
+        client_id: 'your-client-id', // Replace with your Google OAuth client ID
+        scope: 'profile email',
+      }).then(() => {
+        this.auth2 = gapi.auth2.getAuthInstance();
+      });
+    });
+  }
+
+  signInWithGoogle() {
+    this.auth2.signIn().then(
+      (googleUser: any) => this.onGoogleSignInSuccess(googleUser),
+      (error: any) => this.onGoogleSignInFailure(error)
+    );
+  }
 
   toggleTheme() {
     this.isDarkTheme = !this.isDarkTheme;
@@ -151,5 +180,32 @@ export class AppComponent {
 
 
 
+  onGoogleSignInSuccess(googleUser: any) {
+    const profile = googleUser.getBasicProfile();
+    console.log('ID: ' + profile.getId());
+    console.log('Name: ' + profile.getName());
+    console.log('Email: ' + profile.getEmail());
+
+    // Store generated password to Google Cloud Storage
+    // const bucketName = 'your-bucket-name'; // Replace with your Google Cloud Storage bucket name
+    // const fileName = 'generated-password.txt'; // Replace with the desired file name
+
+    // const file = this.storage.bucket(bucketName).file(fileName);
+
+    // file.save(this.password, (err) => {
+    //   if (err) {
+    //     console.error('Error saving password to Google Cloud Storage:', err);
+    //   } else {
+    //     console.log('Password saved to Google Cloud Storage successfully.');
+
+    //     // Display a success message or perform additional actions
+    //     alert('Password saved successfully!');
+    //   }
+    // });
+  }
+
+  onGoogleSignInFailure(error: any) {
+    console.error('Google Sign-In failed:', error);
+  }
 
 }
