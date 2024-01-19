@@ -1,12 +1,37 @@
-<div class="flex h-screen bg-[#0A090E] dark:bg-black">
+<div class="flex h-screen bg-[#0A090E] ">
   <div class="m-auto w-[310px]">
     <div class="card-wrap">
       <h6 class="text-center text-slate-500 mb-4">Password Generator</h6>
-      <div class="max-w-md overflow-hidden shadow-lg bg-[#24232B] dark:bg-black mb-3">
+      <ng-container *ngIf="isLoggedIn">
+      <div class="max-w-md overflow-hidden shadow-lg bg-[#24232B]  mb-3 ">
+        <div class="logged-user flex justify-between ">
+          <!-- <h5>Hi, {{userName | titlecase}}</h5> -->
+          <div class="flex gap-4 px-3 py-3">
+            <img class="w-8 h-8 p-0.5 rounded-full ring-2 ring-slate-50"
+              [src]="profilePic" alt="">
+            <div class="flex flex-col justify-center">
+              <p class="text-gray-200 text-xs">Hello,</p>
+              <p class="font-semibold text-slate-50 hover:text-primary text-sm">{{userName | titlecase}}</p>
+            </div>
+          </div>
+          <div class="flex bg-red-600 items-stretch px-2 cursor-pointer" (click)="handleLogout()">
+            <div class="flex self-center ">
+            <svg class="w-3.5 h-3.5 text-slate-300 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 16 16">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 8h11m0 0-4-4m4 4-4 4m-5 3H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h3" />
+            </svg>
+            <!-- <span class="text-xs mt-1 block text-slate-300 cursor-pointer hover:underline hover:text-white font-semibold">Logout</span> -->
+            </div>
+          </div>
+        </div>
+      </div>
+      </ng-container>
+      <div class="max-w-md overflow-hidden shadow-lg bg-[#24232B]  mb-3">
         <div class="px-3 py-4">
           <div class="relative w-full">
             <div class="absolute inset-y-0 end-0 flex items-center pe-1 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+              <svg class="w-4 h-4 text-gray-500" aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
                 <path
                   d="M5 9V4.13a2.96 2.96 0 0 0-1.293.749L.879 7.707A2.96 2.96 0 0 0 .13 9H5Zm11.066-9H9.829a2.98 2.98 0 0 0-2.122.879L7 1.584A.987.987 0 0 0 6.766 2h4.3A3.972 3.972 0 0 1 15 6v10h1.066A1.97 1.97 0 0 0 18 14V2a1.97 1.97 0 0 0-1.934-2Z">
@@ -17,12 +42,12 @@
               </svg>
             </div>
             <input type="text" id="simple-search"
-              class="text-white text-sm bg-transparent  focus:black focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-text-white dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              class="text-white text-sm bg-transparent  focus:black focus:border-blue-500 block w-full"
               placeholder="Your Password" [value]="password">
           </div>
         </div>
       </div>
-      <div class="max-w-md overflow-hidden shadow-lg bg-[#24232B] dark:bg-black">
+      <div class="max-w-md overflow-hidden shadow-lg bg-[#24232B] ">
         <div class="px-6 py-4">
           <div class="flex justify-between items-center">
             <div class="text-xs text-white">Character Length</div>
@@ -75,7 +100,9 @@
                   Strength
                 </div>
                 <div class="flex-1 max-w-[40px] ml-auto relative">
-                  <span class="password-strength-label absolute right-[55px] top-3 text-nowrap uppercase font-semibold text-white">{{ passwordStrengthLabel
+                  <span
+                    class="password-strength-label absolute right-[55px] top-3 text-nowrap uppercase font-semibold text-white">{{
+                    passwordStrengthLabel
                     }}</span>
 
                   <password-strength-meter [password]="password" (strengthChange)="onPasswordStrengthChange($event)"
@@ -87,10 +114,20 @@
             </div>
             <div class="field mt-4">
               <div class="control">
-                <button class="bg-transparent hover:bg-primary text-primary hover:text-slate-900 font-semibold py-3 px-4 border border-primary w-full text-xs uppercase hover:border-transparent is-success is-fullwidth" (click)="generatePassword()">Generate </button>
                 <button
-                  class="bg-transparent hover:bg-primary text-primary hover:text-slate-900 font-semibold py-3 px-4 border border-primary w-full text-xs uppercase hover:border-transparent is-success is-fullwidth" (click)="signInWithGoogle()"
-                 >Save Password </button>
+                  class="bg-transparent hover:bg-primary text-primary hover:text-slate-900 font-semibold py-3 px-4 border border-primary w-full text-xs uppercase hover:border-transparent is-success is-fullwidth"
+                  (click)="generatePassword()">Generate </button>
+
+                <div *ngIf="!isLoggedIn">
+                  <div #googleSignInBtn></div>
+                </div>
+                <!-- Display the Logout button if logged in -->
+                <div *ngIf="isLoggedIn">
+                        {{isLoggedIn}}
+
+                </div>
+
+
               </div>
             </div>
           </div>
