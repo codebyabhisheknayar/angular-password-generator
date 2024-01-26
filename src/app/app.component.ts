@@ -1,11 +1,14 @@
-import { Component, ElementRef, HostBinding, OnInit, ViewChild } from '@angular/core';
+declare const gapi: any;
+
+import { ChangeDetectorRef, Component, ElementRef, HostBinding, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Options } from 'ngx-slider-v2';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { AuthService } from './auth.service';
+import { GoogleApiService } from './auth.service';
+import { ThemeService } from './services/theme.service';
 
-declare var google: any;
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -14,6 +17,9 @@ declare var google: any;
 export class AppComponent implements OnInit {
   @HostBinding('class') class = 'dark';
   @ViewChild('googleSignInBtn') googleSignInBtn!: ElementRef;
+  @ViewChild('speakerModal') speakerModal!: ElementRef;
+
+
 
   title = 'angular-password-generator';
   password = '';
@@ -23,7 +29,8 @@ export class AppComponent implements OnInit {
   includeSymbols = true;
   passwordStrengthLabel: string = '';
   sliderControl: FormControl = new FormControl(10);
-  userName= '' ;
+  userName = '';
+  passwordLabel = new FormControl('');
 
   options: Options = {
     floor: 1,
@@ -37,24 +44,33 @@ export class AppComponent implements OnInit {
   score: number | null = null;
   isLoggedIn: boolean = false;
   profilePic: any;
+  clientiD = "438341116528-9nq9917dvo6lod4dgqsf7st6p4q8ua5l.apps.googleusercontent.com";
 
-  constructor(private http: HttpClient, private router: Router, public auth: AuthService,) { }
+  currentTheme: string;
+  savedSuccess: boolean = false;
+  defaultImage = 'https://idea.urmia.ir/Content/images/user.png';
+  folderName = 'PasswordGenerator';
+  fileName = 'passwords.json';
+  isViewPassword: boolean = false;
+  viewSavedPassword: any;
+  passwordList: any;
+
+  constructor(private cdr: ChangeDetectorRef, public themeService: ThemeService, private http: HttpClient, private router: Router, public googleApiService: GoogleApiService,) {
+    this.currentTheme = themeService.getTheme();
+  }
 
   ngOnInit(): void {
-    google.accounts.id.initialize({
-      client_id: '438341116528-9nq9917dvo6lod4dgqsf7st6p4q8ua5l.apps.googleusercontent.com',
-      callback: (resp: any) => this.handleLogin(resp)
-    });
-    setTimeout(() => {
+    this.themeService.applyStoredTheme();
+    this.googleApiService.initClient().then(() => {
+      // Initialization successful
       if (this.googleSignInBtn) {
-        google.accounts.id.renderButton(this.googleSignInBtn.nativeElement, {
-          theme: 'filled_blue',
-          size: 'large',
-          shape: 'rectangle',
-          width: 260
-        })
+        this.renderGoogleSignInButton();
       }
-    }, 0);
+      // this.checkUserSession();
+    }).catch((error) => {
+      console.error('Error initializing Google Drive API client', error);
+    });
+
 
 
     const storedCredentials = sessionStorage.getItem("loggedUser");
@@ -67,30 +83,61 @@ export class AppComponent implements OnInit {
 
 
 
-  private decodeToken(token: string) {
-    return JSON.parse(atob(token.split(".")[1]))
-  }
-  handleLogin(response: any) {
-    console.log('work');
-    if (response) {
-      const payLoad = this.decodeToken(response.credential);
-      sessionStorage.setItem("loggedUser", JSON.stringify(payLoad));
-      this.isLoggedIn = true;
-      console.log('work', this.isLoggedIn);
-      window.location.reload();
+  private decodeToken(token: string): any {
+    try {
+      if (typeof token === 'string') {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload && payload.email) {
+          return payload;
+        }
+      }
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
     }
   }
 
-  // Function to handle logout
-  handleLogout() {
-    this.auth.handleLogout();
+
+  private renderGoogleSignInButton(): void {
+    gapi.signin2.render(this.googleSignInBtn.nativeElement, {
+      'scope': 'email profile',
+      'width': 265,
+      'height': 40,
+      'longtitle': true,
+      'theme': 'dark',
+      'onsuccess': this.onGoogleSignInSuccess.bind(this),
+      'onfailure': this.onGoogleSignInFailure.bind(this)
+    });
+  }
+
+  private onGoogleSignInSuccess(googleUser: any): void {
+    const idToken = googleUser.getAuthResponse().id_token;
+    const payload = this.decodeToken(idToken);
+    sessionStorage.setItem('loggedUser', JSON.stringify(payload));
+    this.isLoggedIn = true;
+    this.userName = payload.name;
+    this.profilePic = payload.picture;
+    this.googleSignInBtn.nativeElement.style.display = 'none';
+    this.getFile();
+    this.cdr.detectChanges();
+  }
+
+  onGoogleSignInFailure(error: any): void {
+    // Handle the sign-in failure
+
+  }
+
+  handleLogout(): void {
+    this.googleApiService.signOut();
     this.isLoggedIn = false;
-    window.location.reload();
-    // Additional logic or navigation for logout
+    this.cdr.detectChanges();
+    location.reload();
   }
 
   toggleTheme() {
-    this.isDarkTheme = !this.isDarkTheme;
+    this.themeService.toggleTheme();
+    this.currentTheme = this.themeService.getTheme();
+    this.cdr.detectChanges();
   }
   onChangeUseUppercaseLetters() {
     console.log(this.includeUppercaseLetters);
@@ -109,32 +156,7 @@ export class AppComponent implements OnInit {
   }
 
   logSliderValue(event: any) {
-    console.log('Slider Value:', event);
-    // const desiredCheckboxCount = this.sliderControl.value;
-    // // Update checkbox states based on the slider value
-    // if (desiredCheckboxCount >= 1 && !this.includeUppercaseLetters) {
-    //   this.includeUppercaseLetters = true;
-    // } else if (desiredCheckboxCount < 1 && this.includeUppercaseLetters) {
-    //   this.includeUppercaseLetters = false;
-    // }
 
-    // if (desiredCheckboxCount >= 2 && !this.includeLowercaseLetters) {
-    //   this.includeLowercaseLetters = true;
-    // } else if (desiredCheckboxCount < 2 && this.includeLowercaseLetters) {
-    //   this.includeLowercaseLetters = false;
-    // }
-
-    // if (desiredCheckboxCount >= 3 && !this.includeNumbers) {
-    //   this.includeNumbers = true;
-    // } else if (desiredCheckboxCount < 3 && this.includeNumbers) {
-    //   this.includeNumbers = false;
-    // }
-
-    // if (desiredCheckboxCount >= 4 && !this.includeSymbols) {
-    //   this.includeSymbols = true;
-    // } else if (desiredCheckboxCount < 4 && this.includeSymbols) {
-    //   this.includeSymbols = false;
-    // }
   }
 
 
@@ -178,7 +200,120 @@ export class AppComponent implements OnInit {
     }
 
 
-    this.password = generatedPassword.join('')
+    this.password = generatedPassword.join('');
+
+  }
+
+  savePasswordToDrive(): Promise<any> {
+    const password = this.password;
+    if (!password) {
+      console.error('Password is empty or undefined.');
+      return Promise.reject('Password is empty or undefined.');
+    }
+    const folderName = this.folderName;
+    const fileName = this.fileName;
+    return gapi.client.drive.files.list({
+      q: `name='${folderName}' and mimeType='application/vnd.google-apps.folder'`,
+      fields: 'files(id, name)',
+    }).then((response: any) => {
+      const folders = response.result.files;
+
+      if (folders && folders.length > 0) {
+        const folderId = folders[0].id;
+        return this.checkAndCreateFile(fileName, folderId, password);
+      } else {
+        return this.createFolder(folderName).then((newFolderId: string) => {
+          return this.checkAndCreateFile(fileName, newFolderId, password);
+        }).catch(error => {
+          console.error('Error creating folder:', error);
+          return Promise.reject('Error creating folder.');
+        });
+      }
+    });
+  }
+
+  private checkAndCreateFile(fileName: string, folderId: string, password: string): Promise<any> {
+    return gapi.client.drive.files.list({
+      q: `name='${fileName}' and mimeType='application/json' and '${folderId}' in parents`,
+      fields: 'files(id, name)',
+    }).then((filesResponse: any) => {
+      const files = filesResponse.result.files;
+
+      if (files && files.length > 0) {
+        const fileId = files[0].id;
+        return this.getFileContent(fileId).then((content: string) => {
+          const passwords = JSON.parse(content || '[]');
+          const newPasswordEntry = {
+            id: this.generateUniqueId(),
+            label: this.passwordLabel.value,
+            password: password,
+            timestamp: new Date().toISOString(),
+          };
+          passwords.push(newPasswordEntry);
+          return this.updateFileContent(fileId, JSON.stringify(passwords, null, 2)).then(() => {
+            this.savedSuccess = true;
+            console.log(this.savedSuccess);
+            this.cdr.detectChanges();
+          });
+        });
+      } else {
+        const initialPasswords = [{
+          id: this.generateUniqueId(),
+          label: this.passwordLabel.value,
+          password: password,
+          timestamp: new Date().toISOString(),
+        }];
+        return this.createPasswordFile(fileName, folderId, JSON.stringify(initialPasswords, null, 2), 'application/json').then(() => {
+          this.savedSuccess = true;
+          this.cdr.detectChanges();
+        });
+      }
+    });
+  }
+
+  private createFolder(folderName: string): Promise<string> {
+    return gapi.client.drive.files.create({
+      name: folderName,
+      mimeType: 'application/vnd.google-apps.folder',
+    }).then((folderResponse: any) => {
+      console.log(`Folder "${folderName}" created successfully.`);
+      return folderResponse.result.id;
+    }).catch((error: any) => {
+      console.error('Error creating folder:', error);
+      return Promise.reject('Error creating folder.');
+    });
+  }
+
+
+  private getFileContent(fileId: string): Promise<string> {
+    return gapi.client.drive.files.get({
+      fileId: fileId,
+      alt: 'media',
+    }).then((response: any) => {
+      return response.body;
+    });
+  }
+
+  private generateUniqueId(): string {
+    return Math.random().toString(36).substring(2) + new Date().getTime().toString(36);
+  }
+
+  private createPasswordFile(fileName: string, folderId: string, content: string, mimeType: string): Promise<any> {
+    return gapi.client.drive.files.create({
+      name: fileName,
+      mimeType: mimeType,
+      parents: [folderId],
+      body: content,
+    });
+  }
+
+  private updateFileContent(fileId: string, content: string): Promise<any> {
+    return gapi.client.request({
+      path: `/upload/drive/v3/files/${fileId}`,
+      method: 'PATCH',
+      params: { uploadType: 'media' },
+      body: content,
+    });
   }
 
 
@@ -208,5 +343,85 @@ export class AppComponent implements OnInit {
     }
   }
 
+  async showModal(value: any): Promise<void> {
+    try {
+      if (value === 'save') {
+        const password = this.passwordLabel.value; // Assuming this is the correct form control
+        console.log(password);
 
+        if (!password) {
+          console.error('Password is empty or undefined.');
+          return Promise.reject('Password is empty or undefined.');
+        }
+      }
+
+      if (value === 'view') {
+        this.isViewPassword = true;
+        this.savedSuccess = false;
+        await this.getFile(); // Wait for the getFile method to complete
+         this.passwordList = this.viewSavedPassword;
+        console.log('password', this.passwordList);
+      }
+
+      if (this.speakerModal && this.speakerModal.nativeElement) {
+        this.speakerModal.nativeElement.open = !this.speakerModal.nativeElement.open;
+      }
+
+      return Promise.resolve();
+    } catch (error) {
+      // Handle errors appropriately
+      console.error('An error occurred:', error);
+      return Promise.reject(error);
+    }
+  }
+
+
+  onError(): void {
+    this.profilePic = this.defaultImage;
+  }
+
+  getFile() {
+
+    const folderName = this.folderName;
+    const fileName = this.fileName;
+    return gapi.client.drive.files.list({
+      q: `name='${folderName}' and mimeType='application/vnd.google-apps.folder'`,
+      fields: 'files(id, name)',
+    }).then((response: any) => {
+      const folders = response.result.files;
+
+      if (folders && folders.length > 0) {
+        const folderId = folders[0].id;
+        return this.getFolder(fileName, folderId);
+      } else {
+
+        console.error(`Folder not found: ${folderName}`);
+        return Promise.reject(`Folder not found: ${folderName}`);
+      }
+    });
+
+  }
+
+  private getFolder(fileName: string, folderId: string): Promise<any> {
+
+    return gapi.client.drive.files.list({
+      q: `name='${fileName}' and mimeType='application/json' and '${folderId}' in parents`,
+      fields: 'files(id, name)',
+    }).then((filesResponse: any) => {
+      const files = filesResponse.result.files;
+
+      if (files && files.length > 0) {
+        const fileId = files[0].id;
+        return this.getFileContent(fileId).then((content: string) => {
+          const savedPassword = JSON.parse(content || '[]');
+          this.viewSavedPassword = savedPassword;
+        });
+      }
+      else {
+        // Handle the case where the file doesn't exist
+        console.error(`File not found: ${fileName}`);
+        return Promise.reject(`File not found: ${fileName}`);
+      }
+    })
+  }
 }

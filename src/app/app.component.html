@@ -1,38 +1,53 @@
-<div class="flex h-screen bg-[#0A090E] ">
+<div class="flex h-screen">
+  <label class="swap swap-rotate fixed top-4 right-4">
+    <input type="checkbox" class="theme-controller" value="synthwave" (click)="toggleTheme()" />
+    <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path
+        d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
+    </svg>
+    <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path
+        d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
+    </svg>
+  </label>
   <div class="m-auto w-[310px]">
     <div class="card-wrap">
       <h6 class="text-center text-slate-500 mb-4">Password Generator</h6>
       <ng-container *ngIf="isLoggedIn">
-      <div class="max-w-md overflow-hidden shadow-lg bg-[#24232B]  mb-3 ">
-        <div class="logged-user flex justify-between ">
-          <!-- <h5>Hi, {{userName | titlecase}}</h5> -->
-          <div class="flex gap-4 px-3 py-3">
-            <img class="w-8 h-8 p-0.5 rounded-full ring-2 ring-slate-50"
-              [src]="profilePic" alt="">
-            <div class="flex flex-col justify-center">
-              <p class="text-gray-200 text-xs">Hello,</p>
-              <p class="font-semibold text-slate-50 hover:text-primary text-sm">{{userName | titlecase}}</p>
+        <div class="max-w-md overflow-hidden shadow-lg  mb-3 ">
+          <div class="logged-user flex justify-between ">
+            <!-- <h5>Hi, {{userName | titlecase}}</h5> -->
+            <div class="flex gap-4 px-3 py-3">
+              <img class="w-8 h-8 p-0.5 rounded-full ring-2"
+                [ngClass]="themeService.getTheme() === 'dark' ? 'ring-slate-50' : 'ring-slate-600 '" [src]="profilePic"
+                [alt]="userName" (error)="onError()">
+              <div class="flex flex-col justify-center">
+                <p class=" text-xs"
+                  [ngClass]="themeService.getTheme() === 'dark' ? 'text-gray-200' : 'text-slate-400 '">Hello,</p>
+                <p class="font-semibold text-slate-50 hover:text-primary text-sm"
+                  [ngClass]="themeService.getTheme() === 'dark' ? 'text-slate-50' : 'text-slate-600 '">{{userName |
+                  titlecase}}</p>
+              </div>
             </div>
-          </div>
-          <div class="flex bg-red-600 items-stretch px-2 cursor-pointer" (click)="handleLogout()">
-            <div class="flex self-center ">
-            <svg class="w-3.5 h-3.5 text-slate-300 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-              viewBox="0 0 16 16">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 8h11m0 0-4-4m4 4-4 4m-5 3H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h3" />
-            </svg>
-            <!-- <span class="text-xs mt-1 block text-slate-300 cursor-pointer hover:underline hover:text-white font-semibold">Logout</span> -->
+            <div class="flex bg-red-600 items-stretch px-2 cursor-pointer" (click)="handleLogout()">
+              <div class="flex self-center ">
+                <svg class="w-3.5 h-3.5 text-slate-300 dark:text-slate-500" aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 8h11m0 0-4-4m4 4-4 4m-5 3H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h3" />
+                </svg>
+                <!-- <span class="text-xs mt-1 block text-slate-300 cursor-pointer hover:underline hover:text-slate-500 font-semibold">Logout</span> -->
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </ng-container>
-      <div class="max-w-md overflow-hidden shadow-lg bg-[#24232B]  mb-3">
+      <div class="max-w-md overflow-hidden shadow-lg   mb-3">
         <div class="px-3 py-4">
           <div class="relative w-full">
             <div class="absolute inset-y-0 end-0 flex items-center pe-1 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-500" aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
+              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor" viewBox="0 0 18 20">
                 <path
                   d="M5 9V4.13a2.96 2.96 0 0 0-1.293.749L.879 7.707A2.96 2.96 0 0 0 .13 9H5Zm11.066-9H9.829a2.98 2.98 0 0 0-2.122.879L7 1.584A.987.987 0 0 0 6.766 2h4.3A3.972 3.972 0 0 1 15 6v10h1.066A1.97 1.97 0 0 0 18 14V2a1.97 1.97 0 0 0-1.934-2Z">
                 </path>
@@ -41,24 +56,25 @@
                 </path>
               </svg>
             </div>
-            <input type="text" id="simple-search"
-              class="text-white text-sm bg-transparent  focus:black focus:border-blue-500 block w-full"
+            <input disabled type="text" id="simple-search"
+              class="text-slate-500 text-sm bg-transparent  focus:black focus:border-blue-500 block w-full"
               placeholder="Your Password" [value]="password">
           </div>
         </div>
       </div>
-      <div class="max-w-md overflow-hidden shadow-lg bg-[#24232B] ">
+      <div class="max-w-md relative shadow-lg">
         <div class="px-6 py-4">
           <div class="flex justify-between items-center">
-            <div class="text-xs text-white">Character Length</div>
-            <div class="text-lg text-primary">{{sliderControl.value}}</div>
+            <div class="text-xs text-slate-500">Character Length</div>
+            <div class="text-l" [ngClass]="themeService.getTheme() === 'dark' ? 'text-primary' : 'text-slate-600 '">
+              {{sliderControl.value}}</div>
           </div>
           <div class="ngx-slider-wrap mb-3">
             <ngx-slider [options]="options" (ngModelChange)="logSliderValue($event)"
               [formControl]="sliderControl"></ngx-slider>
           </div>
           <div class="password-option-wrap">
-            <div class="field text-xs mb-2 text-white">
+            <div class="field text-xs mb-2 text-slate-500">
               <div class="control">
                 <label class="checkbox" for="use-uppercase">
                   <input (change)="onChangeUseUppercaseLetters()" type="checkbox" class="form-check-input"
@@ -67,7 +83,7 @@
                 </label>
               </div>
             </div>
-            <div class="field text-xs mb-2 text-white">
+            <div class="field text-xs mb-2 text-slate-500">
               <div class="control">
                 <label class="checkbox" for="use-lowercase">
                   <input (change)="onChangeUseLowercaseLetters()" type="checkbox" class="form-check-input"
@@ -76,7 +92,7 @@
                 </label>
               </div>
             </div>
-            <div class="field text-xs mb-2 text-white">
+            <div class="field text-xs mb-2 text-slate-500">
               <div class="control">
                 <label class="checkbox" for="use-numbers">
                   <input (change)="onChangeUseNumbers()" type="checkbox" class="form-check-input" id="use-numbers"
@@ -85,7 +101,7 @@
                 </label>
               </div>
             </div>
-            <div class="field text-xs mb-2 text-white">
+            <div class="field text-xs mb-2 text-slate-500">
               <div class="control">
                 <label class="checkbox" for="use-symbols">
                   <input (change)="onChangeUseSymbols()" type="checkbox" class="form-check-input" id="use-symbols"
@@ -94,14 +110,15 @@
                 </label>
               </div>
             </div>
-            <div class="password-strength-wrap px-2.5 my-2.5 bg-[#18171F]">
+            <div class="password-strength-wrap px-2.5 my-2.5"
+              [ngClass]="themeService.getTheme() === 'dark' ? 'bg-slate-700' : 'bg-slate-200 '">
               <div class="flex items-center">
                 <div class="uppercase text-xs text-slate-500 font-medium">
                   Strength
                 </div>
                 <div class="flex-1 max-w-[40px] ml-auto relative">
                   <span
-                    class="password-strength-label absolute right-[55px] top-3 text-nowrap uppercase font-semibold text-white">{{
+                    class="password-strength-label absolute right-[55px] top-3 text-nowrap uppercase font-semibold text-slate-500">{{
                     passwordStrengthLabel
                     }}</span>
 
@@ -115,18 +132,21 @@
             <div class="field mt-4">
               <div class="control">
                 <button
-                  class="bg-transparent hover:bg-primary text-primary hover:text-slate-900 font-semibold py-3 px-4 border border-primary w-full text-xs uppercase hover:border-transparent is-success is-fullwidth"
+                  class="bg-transparent hover:bg-primary text-primary hover:text-slate-900 font-semibold py-3 px-4 border border-primary w-full mb-3 text-xs uppercase hover:border-transparent is-success is-fullwidth"
+                  [ngClass]="themeService.getTheme() === 'dark' ? 'text-primary' : 'text-slate-600 '"
                   (click)="generatePassword()">Generate </button>
 
-                <div *ngIf="!isLoggedIn">
+                <div>
                   <div #googleSignInBtn></div>
+                  <ng-container *ngIf="isLoggedIn">
+                    <button (click)="showModal('save')"
+                      class="bg-primary hover:bg-primary text-black hover:text-slate-900 font-semibold py-3 px-4 border border-primary w-full text-xs uppercase hover:border-transparent is-success is-fullwidth">add
+                      to drive</button>
+                    <button (click)="showModal('view')"
+                      class="bg-accent hover:bg-accent mt-3 text-black hover:text-slate-900 font-semibold py-3 px-4 border border-primary w-full text-xs uppercase hover:border-transparent is-success is-fullwidth">Saved
+                      Passwords</button>
+                  </ng-container>
                 </div>
-                <!-- Display the Logout button if logged in -->
-                <div *ngIf="isLoggedIn">
-                        {{isLoggedIn}}
-
-                </div>
-
 
               </div>
             </div>
@@ -139,3 +159,63 @@
   </div>
 
 </div>
+
+<dialog id="my_modal_1" class="modal" #speakerModal>
+  <div class="modal-box">
+    <div class="py-4">
+      <ng-container *ngIf="!savedSuccess && !isViewPassword">
+        <label class="form-control w-full max-w-xs">
+          <div class="label">
+            <span class="label-text">Enter a Name?</span>
+          </div>
+          <input [formControl]="passwordLabel" type="text" placeholder="Type here"
+            class="input input-bordered w-full max-w-xs" />
+        </label>
+      </ng-container>
+      <ng-container *ngIf="savedSuccess && !isViewPassword">
+        <div role="alert" class="alert alert-success p-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Password successfully saved to Google Drive!</span>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="isViewPassword">
+        <div class="passwordlist">
+          <!-- <div class="grid grid-cols-3" *ngFor="let item of passwordList"> -->
+          <div class="grid grid-cols-2 gap-4">
+            <div *ngFor="let item of passwordList">
+              <label class="form-control w-full max-w-xs relative">
+                <div class="label">
+                  <span class="label-text">{{item?.label | titlecase}}</span>
+                </div>
+                <input type="text" [value]="item?.password" disabled class="input input-bordered w-full max-w-xs" />
+                    <div class="absolute top-12 right-2.5 flex items-center pe-1 pointer-events-none">
+                      <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                        viewBox="0 0 18 20">
+                        <path
+                          d="M5 9V4.13a2.96 2.96 0 0 0-1.293.749L.879 7.707A2.96 2.96 0 0 0 .13 9H5Zm11.066-9H9.829a2.98 2.98 0 0 0-2.122.879L7 1.584A.987.987 0 0 0 6.766 2h4.3A3.972 3.972 0 0 1 15 6v10h1.066A1.97 1.97 0 0 0 18 14V2a1.97 1.97 0 0 0-1.934-2Z">
+                        </path>
+                        <path
+                          d="M11.066 4H7v5a2 2 0 0 1-2 2H0v7a1.969 1.969 0 0 0 1.933 2h9.133A1.97 1.97 0 0 0 13 18V6a1.97 1.97 0 0 0-1.934-2Z">
+                        </path>
+                      </svg>
+                    </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+    <div class="modal-action">
+      <button *ngIf="!savedSuccess && !isViewPassword" class="btn" (click)="savePasswordToDrive()">Add to Drive</button>
+      <form method="dialog">
+
+        <button class="btn btn-sm btn-circle btn-neutral hover:btn-primary hover:text-slate-50 absolute right-2 top-2"
+          (click)="speakerModal.close();savedSuccess = false">✕</button>
+      </form>
+    </div>
+  </div>
+</dialog>

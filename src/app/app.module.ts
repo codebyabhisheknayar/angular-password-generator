@@ -8,6 +8,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { PasswordStrengthMeterModule } from 'angular-password-strength-meter';
 import { DEFAULT_PSM_OPTIONS } from 'angular-password-strength-meter/zxcvbn';
 import { HttpClientModule } from '@angular/common/http';
+import { ThemeService } from './services/theme.service';
 @NgModule({
   declarations: [
     AppComponent
@@ -21,6 +22,7 @@ import { HttpClientModule } from '@angular/common/http';
     PasswordStrengthMeterModule.forRoot(DEFAULT_PSM_OPTIONS)
   ],
   providers: [
+    ThemeService
   ],
   bootstrap: [AppComponent]
 })
