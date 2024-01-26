@@ -140,7 +140,7 @@ export class AppComponent implements OnInit {
     this.cdr.detectChanges();
   }
   onChangeUseUppercaseLetters() {
-    console.log(this.includeUppercaseLetters);
+
     this.includeUppercaseLetters = !this.includeUppercaseLetters
   }
 
@@ -156,7 +156,6 @@ export class AppComponent implements OnInit {
   }
 
   logSliderValue(event: any) {
-
   }
 
 
@@ -318,7 +317,6 @@ export class AppComponent implements OnInit {
 
 
   public onPasswordStrengthChange(score: number | null) {
-    console.log(score);
     if (score !== null) {
       switch (Math.round(score)) {
         case 0:

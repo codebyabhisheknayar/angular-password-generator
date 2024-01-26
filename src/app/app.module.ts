@@ -9,6 +9,7 @@ import { PasswordStrengthMeterModule } from 'angular-password-strength-meter';
 import { DEFAULT_PSM_OPTIONS } from 'angular-password-strength-meter/zxcvbn';
 import { HttpClientModule } from '@angular/common/http';
 import { ThemeService } from './services/theme.service';
+import { ClipboardModule } from 'ngx-clipboard';
 @NgModule({
   declarations: [
     AppComponent
@@ -18,6 +19,7 @@ import { ThemeService } from './services/theme.service';
     AppRoutingModule,
     HttpClientModule,
     NgxSliderModule,
+    ClipboardModule,
     ReactiveFormsModule,
     PasswordStrengthMeterModule.forRoot(DEFAULT_PSM_OPTIONS)
   ],
