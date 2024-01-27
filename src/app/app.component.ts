@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { GoogleApiService } from './auth.service';
 import { ThemeService } from './services/theme.service';
 import { ClipboardService } from 'ngx-clipboard';
+import * as CryptoJS from 'crypto-js';
 
 @Component({
   selector: 'app-root',
@@ -59,6 +60,8 @@ export class AppComponent implements OnInit {
   isBtnSubmitted: boolean = false;
   showErrorMessage: boolean = false;
   showPasswordCopyMsg: boolean = false;
+  encryptionKey: string = 'de8c4f2e5a2654fc5d9b4e82aea6b0c1e835d023935473acc40a7e9891947776';
+  // key: string = this.generateEncryptionKey(32);
 
   constructor(private cdr: ChangeDetectorRef, public themeService: ThemeService, private http: HttpClient, private _clipboardService: ClipboardService, public googleApiService: GoogleApiService,) {
     this.currentTheme = themeService.getTheme();
@@ -263,7 +266,8 @@ export class AppComponent implements OnInit {
             timestamp: new Date().toISOString(),
           };
           passwords.push(newPasswordEntry);
-          return this.updateFileContent(fileId, JSON.stringify(passwords, null, 2)).then(() => {
+          const encryptedContent = this.encrypt(JSON.stringify(passwords, null, 2));
+          return this.updateFileContent(fileId, encryptedContent).then(() => {
             this.savedSuccess = true;
             console.log(this.savedSuccess);
             this.passwordLabel.reset();
@@ -277,7 +281,8 @@ export class AppComponent implements OnInit {
           password: password,
           timestamp: new Date().toISOString(),
         }];
-        return this.createPasswordFile(fileName, folderId, JSON.stringify(initialPasswords, null, 2), 'application/json').then(() => {
+        const encryptedContent = this.encrypt(JSON.stringify(initialPasswords, null, 2));
+        return this.createPasswordFile(fileName, folderId, encryptedContent, 'application/json').then(() => {
           this.savedSuccess = true;
           this.passwordLabel.reset();
           this.cdr.detectChanges();
@@ -404,7 +409,6 @@ export class AppComponent implements OnInit {
   }
 
   getFile() {
-
     const folderName = this.folderName;
     const fileName = this.fileName;
     return gapi.client.drive.files.list({
@@ -426,7 +430,6 @@ export class AppComponent implements OnInit {
   }
 
   private getFolder(fileName: string, folderId: string): Promise<any> {
-
     return gapi.client.drive.files.list({
       q: `name='${fileName}' and mimeType='application/json' and '${folderId}' in parents`,
       fields: 'files(id, name)',
@@ -436,7 +439,8 @@ export class AppComponent implements OnInit {
       if (files && files.length > 0) {
         const fileId = files[0].id;
         return this.getFileContent(fileId).then((content: string) => {
-          const savedPassword = JSON.parse(content || '[]');
+          const decryptedContent = this.decrypt(content);
+          const savedPassword = JSON.parse(decryptedContent || '[]');
           this.viewSavedPassword = savedPassword;
         });
       }
@@ -446,9 +450,29 @@ export class AppComponent implements OnInit {
       }
     })
   }
+
   closeModal() {
     this.speakerModal.nativeElement.open = false;
     this.savedSuccess = false;
     this.btnSubmitted = false;
   }
+
+  private encrypt(data: string): string {
+    const encrypted = CryptoJS.AES.encrypt(data, this.encryptionKey);
+    return encrypted.toString();
+  }
+
+  private decrypt(data: string): string {
+    const decrypted = CryptoJS.AES.decrypt(data, this.encryptionKey);
+    return decrypted.toString(CryptoJS.enc.Utf8);
+  }
+
+  generateEncryptionKey(length: any) {
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    return Array.from(array, byte => ('0' + byte.toString(16)).slice(-2)).join('');
+  }
+
 }
+
+
