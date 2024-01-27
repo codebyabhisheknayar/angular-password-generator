@@ -36,7 +36,6 @@
                   <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 8h11m0 0-4-4m4 4-4 4m-5 3H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h3" />
                 </svg>
-                <!-- <span class="text-xs mt-1 block text-slate-300 cursor-pointer hover:underline hover:text-slate-500 font-semibold">Logout</span> -->
               </div>
             </div>
           </div>
@@ -45,7 +44,7 @@
       <div class="max-w-md overflow-hidden shadow-lg   mb-3">
         <div class="px-3 py-4">
           <div class="relative w-full">
-            <div class="absolute inset-y-0 end-0 flex items-center pe-1" [ngxClipboard]="passwordgen">
+            <div class="absolute z-10 inset-y-0 end-0 flex items-center pe-1 cursor-pointer" [ngxClipboard]="passwordgen">
               <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
                 <path
@@ -56,8 +55,8 @@
                 </path>
               </svg>
             </div>
-            <input type="text" id="simple-search"
-              class="text-white text-sm bg-transparent  focus:black focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-text-white dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            <input type="text"
+              class="text-sm bg-transparent focus:black focus:border-0 outline-0 block max-w-[90%] w-full"
               placeholder="Your Password" [value]="password" #passwordgen>
           </div>
         </div>
@@ -76,7 +75,7 @@
           <div class="password-option-wrap">
             <div class="field text-xs mb-2 text-slate-500">
               <div class="control">
-                <label class="checkbox" for="use-uppercase">
+                <label class="checkbox border-0" for="use-uppercase">
                   <input (change)="onChangeUseUppercaseLetters()" type="checkbox" class="form-check-input"
                     id="use-uppercase" [checked]="includeUppercaseLetters">
                   Include Uppercase Letters
@@ -85,7 +84,7 @@
             </div>
             <div class="field text-xs mb-2 text-slate-500">
               <div class="control">
-                <label class="checkbox" for="use-lowercase">
+                <label class="checkbox border-0" for="use-lowercase">
                   <input (change)="onChangeUseLowercaseLetters()" type="checkbox" class="form-check-input"
                     id="use-lowercase" [checked]="includeLowercaseLetters">
                   Include Lowercase Letters
@@ -94,7 +93,7 @@
             </div>
             <div class="field text-xs mb-2 text-slate-500">
               <div class="control">
-                <label class="checkbox" for="use-numbers">
+                <label class="checkbox border-0" for="use-numbers">
                   <input (change)="onChangeUseNumbers()" type="checkbox" class="form-check-input" id="use-numbers"
                     [checked]="includeNumbers">
                   Include Numbers
@@ -103,7 +102,7 @@
             </div>
             <div class="field text-xs mb-2 text-slate-500">
               <div class="control">
-                <label class="checkbox" for="use-symbols">
+                <label class="checkbox border-0" for="use-symbols">
                   <input (change)="onChangeUseSymbols()" type="checkbox" class="form-check-input" id="use-symbols"
                     [checked]="includeSymbols">
                   Include Symbols
@@ -132,7 +131,7 @@
             <div class="field mt-4">
               <div class="control">
                 <button
-                  class="bg-transparent hover:bg-primary text-primary hover:text-slate-900 font-semibold py-3 px-4 border border-primary w-full mb-3 text-xs uppercase hover:border-transparent is-success is-fullwidth"
+                  class="bg-transparent hover:bg-primary text-primary ease-linear duration-200 hover:text-slate-900 font-semibold py-3 px-4 border border-primary w-full mb-3 text-xs uppercase hover:border-transparent is-success is-fullwidth"
                   [ngClass]="themeService.getTheme() === 'dark' ? 'text-primary' : 'text-slate-600 '"
                   (click)="generatePassword()">Generate </button>
 
@@ -140,10 +139,10 @@
                   <div #googleSignInBtn></div>
                   <ng-container *ngIf="isLoggedIn">
                     <button (click)="showModal('save')"
-                      class="bg-primary hover:bg-primary text-black hover:text-slate-900 font-semibold py-3 px-4 border border-primary w-full text-xs uppercase hover:border-transparent is-success is-fullwidth">add
+                      class="bg-transparent hover:bg-secondary text-secondary font-semibold py-3 px-4 border ease-linear duration-200  border-secondary w-full text-xs uppercase hover:border-secondary is-success is-fullwidth" [ngClass]="themeService.getTheme() === 'dark' ? 'hover:text-slate-900' : 'hover:text-slate-900'">add
                       to drive</button>
-                    <button (click)="showModal('view')"
-                      class="bg-accent hover:bg-accent mt-3 text-black hover:text-slate-900 font-semibold py-3 px-4 border border-accent w-full text-xs uppercase hover:border-transparent is-success is-fullwidth">Saved
+                    <button [disabled]="btnSubmitted" (click)="showModal('view')"
+                      class="bg-transparent hover:bg-accent hover:border-accent mt-3 text-accent font-semibold ease-linear duration-200 py-3 px-4 border border-accent w-full text-xs uppercase  is-success is-fullwidth" [ngClass]="themeService.getTheme() === 'dark' ? 'hover:text-slate-900' : 'hover:text-slate-900 '">Saved
                       Passwords</button>
                   </ng-container>
                 </div>
@@ -163,6 +162,11 @@
 <dialog id="my_modal_1" class="modal" #speakerModal>
   <div class="modal-box">
     <div class="py-4">
+      <ng-container *ngIf="isLoading">
+        <div class="flex justify-center absolute left-0 right-0">
+        <span class="loading loading-infinity loading-lg text-success"></span>
+        </div>
+      </ng-container>
       <ng-container *ngIf="!savedSuccess && !isViewPassword">
         <label class="form-control w-full max-w-xs">
           <div class="label">
@@ -173,26 +177,25 @@
         </label>
       </ng-container>
       <ng-container *ngIf="savedSuccess && !isViewPassword">
-        <div role="alert" class="alert alert-success p-2">
+        <div role="alert" class="alert alert-success p-1 mt-2.5">
           <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
             viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span>Password successfully saved to Google Drive!</span>
+          <span class="text-sm">Password successfully saved to your Google Drive!</span>
         </div>
       </ng-container>
-      <ng-container *ngIf="isViewPassword">
+      <ng-container *ngIf="isViewPassword && !isLoading">
         <div class="passwordlist">
-          <!-- <div class="grid grid-cols-3" *ngFor="let item of passwordList"> -->
           <div class="grid grid-cols-2 gap-4">
-            <div *ngFor="let item of passwordList">
-              <label class="form-control w-full max-w-xs relative">
+            <div *ngFor="let item of passwordList; index as i">
+              <label class="form-control w-full max-w-xs relative" #passwordContainer>
                 <div class="label">
                   <span class="label-text">{{item?.label | titlecase}}</span>
                 </div>
-                <input type="text" [value]="item?.password" disabled class="input input-bordered w-full max-w-xs" />
-                    <div class="absolute top-12 right-2.5 flex items-center pe-1 pointer-events-none">
+                <input type="text" [value]="item?.password" disabled class="input input-bordered w-full max-w-xs"/>
+                  <div class="absolute top-12 right-2.5 flex items-center pe-1 cursor-pointer" ngxClipboard [cbContent]="item?.password" [container]="passwordContainer">
                       <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                         viewBox="0 0 18 20">
                         <path
@@ -210,12 +213,24 @@
       </ng-container>
     </div>
     <div class="modal-action">
-      <button *ngIf="!savedSuccess && !isViewPassword" class="btn" (click)="savePasswordToDrive()">Add to Drive</button>
+      <button [disabled]="isBtnSubmitted" *ngIf="!savedSuccess && !isViewPassword" class="btn" (click)="savePasswordToDrive()"><span class="loading loading-spinner loading-md" *ngIf="isBtnSubmitted"></span>Add to Drive</button>
       <form method="dialog">
 
         <button class="btn btn-sm btn-circle btn-neutral hover:btn-primary hover:text-slate-50 absolute right-2 top-2"
-          (click)="speakerModal.close();savedSuccess = false">✕</button>
+          (click)="closeModal()">✕</button>
       </form>
     </div>
   </div>
 </dialog>
+
+<div class="toast toast-top toast-end" *ngIf="showErrorMessage">
+  <div class="alert alert-error">
+    <span class="text-sm">Password is empty. Please generate password before saving.</span>
+  </div>
+</div>
+
+<div class="toast toast-top toast-end" *ngIf="showPasswordCopyMsg">
+  <div class="alert alert-success">
+    <span class="text-sm">Password copied to your clipboard.</span>
+  </div>
+</div>

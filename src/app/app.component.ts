@@ -7,18 +7,18 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { GoogleApiService } from './auth.service';
 import { ThemeService } from './services/theme.service';
-
+import { ClipboardService } from 'ngx-clipboard';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
   @HostBinding('class') class = 'dark';
   @ViewChild('googleSignInBtn') googleSignInBtn!: ElementRef;
   @ViewChild('speakerModal') speakerModal!: ElementRef;
-
+  @ViewChild('passwordInput') passwordInput!: ElementRef<HTMLInputElement>;
 
 
   title = 'angular-password-generator';
@@ -54,24 +54,36 @@ export class AppComponent implements OnInit {
   isViewPassword: boolean = false;
   viewSavedPassword: any;
   passwordList: any;
+  isLoading: boolean = false;
+  btnSubmitted: boolean = false;
+  isBtnSubmitted: boolean = false;
+  showErrorMessage: boolean = false;
+  showPasswordCopyMsg: boolean = false;
 
-  constructor(private cdr: ChangeDetectorRef, public themeService: ThemeService, private http: HttpClient, private router: Router, public googleApiService: GoogleApiService,) {
+  constructor(private cdr: ChangeDetectorRef, public themeService: ThemeService, private http: HttpClient, private _clipboardService: ClipboardService, public googleApiService: GoogleApiService,) {
     this.currentTheme = themeService.getTheme();
   }
 
   ngOnInit(): void {
+
     this.themeService.applyStoredTheme();
+
     this.googleApiService.initClient().then(() => {
-      // Initialization successful
       if (this.googleSignInBtn) {
         this.renderGoogleSignInButton();
       }
-      // this.checkUserSession();
     }).catch((error) => {
       console.error('Error initializing Google Drive API client', error);
     });
 
-
+    this._clipboardService.copyResponse$.subscribe(re => {
+      if (re.isSuccess) {
+        this.showPasswordCopyMsg = true;
+        setTimeout(() => {
+          this.showPasswordCopyMsg = false;
+        }, 3500);
+      }
+    });
 
     const storedCredentials = sessionStorage.getItem("loggedUser");
     if (storedCredentials) {
@@ -80,9 +92,6 @@ export class AppComponent implements OnInit {
       this.profilePic = JSON.parse(sessionStorage.getItem("loggedUser")!).picture;
     }
   }
-
-
-
   private decodeToken(token: string): any {
     try {
       if (typeof token === 'string') {
@@ -96,8 +105,6 @@ export class AppComponent implements OnInit {
       return null;
     }
   }
-
-
   private renderGoogleSignInButton(): void {
     gapi.signin2.render(this.googleSignInBtn.nativeElement, {
       'scope': 'email profile',
@@ -205,8 +212,13 @@ export class AppComponent implements OnInit {
 
   savePasswordToDrive(): Promise<any> {
     const password = this.password;
+    this.isBtnSubmitted = true;
     if (!password) {
       console.error('Password is empty or undefined.');
+      this.showErrorMessage = true;
+      setTimeout(() => {
+        this.showErrorMessage = false;
+      }, 5000);
       return Promise.reject('Password is empty or undefined.');
     }
     const folderName = this.folderName;
@@ -222,7 +234,9 @@ export class AppComponent implements OnInit {
         return this.checkAndCreateFile(fileName, folderId, password);
       } else {
         return this.createFolder(folderName).then((newFolderId: string) => {
-          return this.checkAndCreateFile(fileName, newFolderId, password);
+          return this.checkAndCreateFile(fileName, newFolderId, password).then(() => {
+            this.isBtnSubmitted = false;
+          });
         }).catch(error => {
           console.error('Error creating folder:', error);
           return Promise.reject('Error creating folder.');
@@ -252,6 +266,7 @@ export class AppComponent implements OnInit {
           return this.updateFileContent(fileId, JSON.stringify(passwords, null, 2)).then(() => {
             this.savedSuccess = true;
             console.log(this.savedSuccess);
+            this.passwordLabel.reset();
             this.cdr.detectChanges();
           });
         });
@@ -264,6 +279,7 @@ export class AppComponent implements OnInit {
         }];
         return this.createPasswordFile(fileName, folderId, JSON.stringify(initialPasswords, null, 2), 'application/json').then(() => {
           this.savedSuccess = true;
+          this.passwordLabel.reset();
           this.cdr.detectChanges();
         });
       }
@@ -343,35 +359,44 @@ export class AppComponent implements OnInit {
 
   async showModal(value: any): Promise<void> {
     try {
+      this.btnSubmitted = true;
+
       if (value === 'save') {
-        const password = this.passwordLabel.value; // Assuming this is the correct form control
-        console.log(password);
+        const password = this.password;
 
         if (!password) {
-          console.error('Password is empty or undefined.');
-          return Promise.reject('Password is empty or undefined.');
+          this.showErrorMessage = true;
+          setTimeout(() => {
+            this.showErrorMessage = false;
+          }, 5000);
+
+          return Promise.resolve();
         }
+
+        this.speakerModal.nativeElement.open = !this.speakerModal.nativeElement.open;
       }
 
       if (value === 'view') {
+        this.isLoading = true;
         this.isViewPassword = true;
         this.savedSuccess = false;
-        await this.getFile(); // Wait for the getFile method to complete
-         this.passwordList = this.viewSavedPassword;
-        console.log('password', this.passwordList);
-      }
+        this.speakerModal.nativeElement.open = true;
 
-      if (this.speakerModal && this.speakerModal.nativeElement) {
-        this.speakerModal.nativeElement.open = !this.speakerModal.nativeElement.open;
+        await this.getFile();
+
+        this.passwordList = this.viewSavedPassword;
+        console.log('password', this.passwordList);
       }
 
       return Promise.resolve();
     } catch (error) {
-      // Handle errors appropriately
       console.error('An error occurred:', error);
       return Promise.reject(error);
+    } finally {
+      this.isLoading = false;
     }
   }
+
 
 
   onError(): void {
@@ -416,10 +441,14 @@ export class AppComponent implements OnInit {
         });
       }
       else {
-        // Handle the case where the file doesn't exist
         console.error(`File not found: ${fileName}`);
         return Promise.reject(`File not found: ${fileName}`);
       }
     })
+  }
+  closeModal() {
+    this.speakerModal.nativeElement.open = false;
+    this.savedSuccess = false;
+    this.btnSubmitted = false;
   }
 }
