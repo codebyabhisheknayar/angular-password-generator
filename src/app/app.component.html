@@ -141,7 +141,7 @@
                     <button (click)="showModal('save')"
                       class="bg-transparent hover:bg-secondary text-secondary font-semibold py-3 px-4 border ease-linear duration-200  border-secondary w-full text-xs uppercase hover:border-secondary is-success is-fullwidth" [ngClass]="themeService.getTheme() === 'dark' ? 'hover:text-slate-900' : 'hover:text-slate-900'">add
                       to drive</button>
-                    <button [disabled]="btnSubmitted" (click)="showModal('view')"
+                    <button  [disabled]="btnSubmitted" (click)="showModal('view')"
                       class="bg-transparent hover:bg-accent hover:border-accent mt-3 text-accent font-semibold ease-linear duration-200 py-3 px-4 border border-accent w-full text-xs uppercase  is-success is-fullwidth" [ngClass]="themeService.getTheme() === 'dark' ? 'hover:text-slate-900' : 'hover:text-slate-900 '">Saved
                       Passwords</button>
                   </ng-container>

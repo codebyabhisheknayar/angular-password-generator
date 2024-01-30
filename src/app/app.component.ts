@@ -61,6 +61,7 @@ export class AppComponent implements OnInit {
   showErrorMessage: boolean = false;
   showPasswordCopyMsg: boolean = false;
   encryptionKey: string = 'de8c4f2e5a2654fc5d9b4e82aea6b0c1e835d023935473acc40a7e9891947776';
+  isFileAvailable: boolean = false;
   // key: string = this.generateEncryptionKey(32);
 
   constructor(private cdr: ChangeDetectorRef, public themeService: ThemeService, private http: HttpClient, private _clipboardService: ClipboardService, public googleApiService: GoogleApiService,) {
@@ -269,7 +270,7 @@ export class AppComponent implements OnInit {
           const encryptedContent = this.encrypt(JSON.stringify(passwords, null, 2));
           return this.updateFileContent(fileId, encryptedContent).then(() => {
             this.savedSuccess = true;
-            console.log(this.savedSuccess);
+
             this.passwordLabel.reset();
             this.cdr.detectChanges();
           });
@@ -390,7 +391,6 @@ export class AppComponent implements OnInit {
         await this.getFile();
 
         this.passwordList = this.viewSavedPassword;
-        console.log('password', this.passwordList);
       }
 
       return Promise.resolve();
@@ -445,8 +445,9 @@ export class AppComponent implements OnInit {
         });
       }
       else {
-        console.error(`File not found: ${fileName}`);
-        return Promise.reject(`File not found: ${fileName}`);
+        // console.error(`File not found: ${fileName}`);
+        // return Promise.reject(`File not found: ${fileName}`);
+        return;
       }
     })
   }
@@ -455,6 +456,7 @@ export class AppComponent implements OnInit {
     this.speakerModal.nativeElement.open = false;
     this.savedSuccess = false;
     this.btnSubmitted = false;
+    this.cdr.detectChanges();
   }
 
   private encrypt(data: string): string {
